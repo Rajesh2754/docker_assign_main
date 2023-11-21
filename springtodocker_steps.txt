@@ -1,0 +1,138 @@
+Pre reqeusties
+a. Signup for docker https://hub.docker.com/
+b. install docker desktop software
+c. Useful commands
+docker run – This command is used to start a new Docker container from an image.
+docker ps – This command is used to list all the running Docker containers.
+docker stop – This command is used to stop a running container.
+docker rm – This command is used to remove a Docker container.
+docker images – This command is used to list all the Docker images that are currently available on your system.
+docker pull – This command is used to download a Docker image from a registry.
+docker exec – This command is used to execute a command in a running container.
+docker-compose – This command is used to manage multi-container Docker applications.
+d. login to docker using "docker login"
+e. docker pull openjdk:17-alpine
+g. testing 
+docker pull hello-world
+docker run hello-world
+
+
+
+
+====Steps for dockerizing springboot app=====
+
+1. Right click the project and Create new file with name "Dockerfile"
+FROM openjdk:17-jdk-alpine
+EXPOSE 8080
+ARG JAR_FILE=target/*jar
+COPY ./target/spring-boot-docker.jar app.jar
+ENTRYPOINT ["java","-jar","/app.jar"]
+
+
+2. Add finalname tag as below in pon.xml file
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+		</plugins>
+		<finalName>spring-boot-docker</finalName>
+	</build>
+	
+3. Do Maven clean and Maven install
+
+4. Under project >> target >> new jar file will be created "spring-boot-docker.jar"
+
+5. Goto >> terminal >> enter command >> #docker images there will be no images
+
+6. In terminal > navigate to the folder where you have Dockerfile >> run the below commands
+
+>> r0r063r@m-c02dt3wgmd6n assginment-main % docker build -t springapi .
+[+] Building 4.2s (8/8) FINISHED                                                                                                                                                            docker:desktop-linux
+ => [internal] load build definition from Dockerfile                                                                                                                                                        0.1s
+ => => transferring dockerfile: 222B                                                                                                                                                                        0.0s
+ => [internal] load .dockerignore                                                                                                                                                                           0.0s
+ => => transferring context: 2B                                                                                                                                                                             0.0s
+ => [internal] load metadata for docker.io/library/openjdk:17-jdk-alpine                                                                                                                                    3.3s
+ => [auth] library/openjdk:pull token for registry-1.docker.io                                                                                                                                              0.0s
+ => [internal] load build context                                                                                                                                                                           0.5s
+ => => transferring context: 30.49MB                                                                                                                                                                        0.4s
+ => [1/2] FROM docker.io/library/openjdk:17-jdk-alpine@sha256:4b6abae565492dbe9e7a894137c966a7485154238902f2f25e9dbd9784383d81                                                                              0.0s
+ => [2/2] COPY ./target/spring-boot-docker.jar app.jar                                                                                                                                                      0.2s
+ => exporting to image                                                                                                                                                                                      0.2s
+ => => exporting layers                                                                                                                                                                                     0.2s
+ => => writing image sha256:2732827daf5f2ba379f527f12dc0b90b65de90a1ac717a0cb9c877ad43d2e071                                                                                                                0.0s
+ => => naming to docker.io/library/springapi 
+ 
+ 
+>> r0r063r@m-c02dt3wgmd6n assginment-main % docker images
+REPOSITORY         TAG         IMAGE ID       CREATED          SIZE
+springapi          latest      2732827daf5f   28 seconds ago   356MB
+
+
+>> r0r063r@m-c02dt3wgmd6n assginment-main % docker run -p 8000:8080 springapi
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v3.1.5)
+
+
+r0r063r@m-c02dt3wgmd6n assginment-main % docker run -d -p 8000:8080 springapi
+9d0a0a34485a3385c82d7d64160e46af58b8603e663e2d6a2a4294b3cdf227ac
+
+Final:
+Now the application will start to work in 8000 port and not in 8080 port
+
+
+
+=== Once the docker images is created, how to push image in docker hub
+https://medium.com/@javatechie/kubernetes-tutorial-run-deploy-spring-boot-application-in-k8s-cluster-using-yaml-configuration-3b079154d232
+https://minikube.sigs.k8s.io/docs/start/
+https://hub.docker.com/r/danicoolbug/springapi
+
+
+docker images
+docker login
+docker tag springapi:latest danicoolbug/springapi
+docker images
+docker push danicoolbug/springapi
+
+== how to pull and run docker using new image?
+
+docker pull danicoolbug/springapi
+docker images
+docker run -p 8001:8080 danicoolbug/springapi
+docker ps
+docker history
+
+
+:::K8 config
+      containers:
+        - name: spring-boot-k8s
+          image: danicoolbug/springapi
+          # Image that will be used to containers in the cluster
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+
+
+
+kubectl apply -f k8s-deployment.yaml
+kubectl get deployments
+kubectl get pods
+kuberctl logs spring-boot-k8s-7dcbc89d47-l6frc
+
+
+
+
+
+kubectl apply -f k8s-service.yaml
+kubectl get svc
+kubectl get nodes -o wide
+minikube ip
+
